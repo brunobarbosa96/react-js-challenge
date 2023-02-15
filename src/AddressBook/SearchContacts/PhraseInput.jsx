@@ -25,12 +25,11 @@ class PhraseInput extends React.Component {
     return (
       <input
         {...downshiftGetInputProps({
-          // TODO something is wrong here
           className: "PhraseInput",
           ref: inputRef => this.inputRef = inputRef,
           placeholder: "To show contact's details, type its name…",
           value: phrase,
-          onChange: event => onPhraseChange("phrase"),
+          onChange: event => onPhraseChange(event.target.value),
         })}
       />
     );
