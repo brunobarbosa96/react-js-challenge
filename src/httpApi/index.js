@@ -1,3 +1,3 @@
-import FakeHttpApi from "./fakeHttpApi";
+import FakeHttpApi from "./fakeHttpApi"
 
-export { FakeHttpApi };
+export { FakeHttpApi }

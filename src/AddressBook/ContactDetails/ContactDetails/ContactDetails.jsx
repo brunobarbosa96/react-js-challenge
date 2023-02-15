@@ -1,36 +1,27 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import React from "react"
+import PropTypes from "prop-types"
+import { connect } from "react-redux"
 
-import FetchFailure from "../FetchFailure/FetchFailure";
-import Placeholder from "../Placeholder/Placeholder";
+import FetchFailure from "../FetchFailure/FetchFailure"
+import Placeholder from "../Placeholder/Placeholder"
 
-import "./ContactDetails.css";
+import "./ContactDetails.css"
 
 const ContactDetails = ({ data, hasFailedToFetch }) => {
-  const { name, phone, addressLines } = (data || {});
+  const { name, phone, addressLines } = data || {}
 
-  const wrapped = (node) => (
-    <section className="ContactDetails">
-      {node}
-    </section>
-  );
+  const wrapped = (node) => <section className="ContactDetails">{node}</section>
 
   if (hasFailedToFetch) {
-    return wrapped(
-      <FetchFailure className="ContactDetails_failure" />,
-    );
+    return wrapped(<FetchFailure className="ContactDetails_failure" />)
   }
 
   if (!data) {
-    return wrapped(
-      <Placeholder className="ContactDetails_placeholder" />,
-    );
+    return wrapped(<Placeholder className="ContactDetails_placeholder" />)
   }
 
   return wrapped(
     <div className="ContactDetails_data">
-
       <div className="ContactDetails_data_item ContactDetails_name">
         <span>Name</span>
         <span>{name}</span>
@@ -47,10 +38,9 @@ const ContactDetails = ({ data, hasFailedToFetch }) => {
           <span key={String(index)}>{address}</span>
         ))}
       </div>
-
     </div>,
-  );
-};
+  )
+}
 
 ContactDetails.propTypes = {
   data: PropTypes.shape({
@@ -59,13 +49,11 @@ ContactDetails.propTypes = {
     addressLines: PropTypes.arrayOf(PropTypes.string).isRequired,
   }),
   hasFailedToFetch: PropTypes.bool.isRequired,
-};
+}
 
-const mapReduxStateToProps = state => ({
+const mapReduxStateToProps = (state) => ({
   data: state.addressBook.contacts.fetchedContact,
   hasFailedToFetch: state.addressBook.contacts.fetchFailure,
-});
+})
 
-export default connect(
-  mapReduxStateToProps,
-)(ContactDetails);
+export default connect(mapReduxStateToProps)(ContactDetails)

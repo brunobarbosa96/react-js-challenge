@@ -1,11 +1,9 @@
 export default class DataCache {
-
-  data = {};
+  data = {}
 
   store = ({ key, value }) => {
-    this.data[ key ] = value;
-  };
+    this.data[key] = value
+  }
 
-  load = ({ key }) => this.data[ key ];
-
+  load = ({ key }) => this.data[key]
 }
