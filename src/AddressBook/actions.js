@@ -1,64 +1,66 @@
-import { actions as searchActions } from "./SearchContacts";
-import { actions as contactDetailsActions } from "./ContactDetails";
+import { actions as searchActions } from "./SearchContacts"
+import { actions as contactDetailsActions } from "./ContactDetails"
 
-export const updateSearchPhrase = newPhrase =>
+const TIME_TO_HANDLE_REQUEST = 300
+let timer = 0
+export const updateSearchPhrase =
+  (newPhrase) =>
   (dispatch, getState, { httpApi }) => {
-    dispatch(
-      searchActions.updateSearchPhraseStart({ newPhrase }),
-    );
-    httpApi.getFirst5MatchingContacts({ namePart: newPhrase })
-      .then(({ data }) => {
-        const matchingContacts = data.map(contact => ({
-          id: contact.id,
-          value: contact.name,
-        }));
-        // TODO something is wrong here
-        dispatch(
-          searchActions.updateSearchPhraseSuccess({ matchingContacts: [] }),
-        );
-      })
-      .catch(() => {
-        // TODO something is missing here
-      });
-  };
+    dispatch(searchActions.updateSearchPhraseStart({ newPhrase }))
 
-export const selectMatchingContact = selectedMatchingContact =>
+    clearTimeout(timer)
+    timer = setTimeout(
+      () =>
+        httpApi
+          .getFirst5MatchingContacts({ namePart: newPhrase })
+          .then(({ data }) => {
+            const matchingContacts = data.map((contact) => ({
+              id: contact.id,
+              value: contact.name,
+            }))
+            dispatch(
+              searchActions.updateSearchPhraseSuccess({ matchingContacts }),
+            )
+          })
+          .catch(() => {
+            dispatch(searchActions.updateSearchPhraseFailure())
+          }),
+      TIME_TO_HANDLE_REQUEST,
+    )
+  }
+
+export const selectMatchingContact =
+  (selectedMatchingContact) =>
   (dispatch, getState, { httpApi, dataCache }) => {
-
-    // TODO something is missing here
     const getContactDetails = ({ id }) => {
-      return httpApi
-          .getContact({ contactId: selectedMatchingContact.id })
-          .then(({ data }) => ({
-            id: data.id,
-            name: data.name,
-            phone: data.phone,
-            addressLines: data.addressLines,
-          }));
-    };
+      // Avoiding double fetch
+      if (dataCache.data[id]) {
+        return Promise.resolve(dataCache.data[id])
+      }
 
-    dispatch(
-      searchActions.selectMatchingContact({ selectedMatchingContact }),
-    );
+      return httpApi.getContact({ contactId: id }).then(({ data }) => ({
+        id: data.id,
+        name: data.name,
+        phone: data.phone,
+        addressLines: data.addressLines,
+      }))
+    }
 
-    dispatch(
-      contactDetailsActions.fetchContactDetailsStart(),
-    );
+    dispatch(searchActions.selectMatchingContact({ selectedMatchingContact }))
+
+    dispatch(contactDetailsActions.fetchContactDetailsStart())
 
     getContactDetails({ id: selectedMatchingContact.id })
       .then((contactDetails) => {
-        // TODO something is missing here
         dataCache.store({
           key: contactDetails.id,
-        });
-        // TODO something is wrong here
+          value: contactDetails,
+        })
         dispatch(
-          contactDetailsActions.fetchContactDetailsFailure(),
-        );
+          contactDetailsActions.fetchContactDetailsSuccess({ contactDetails }),
+        )
       })
       .catch(() => {
-        dispatch(
-          contactDetailsActions.fetchContactDetailsFailure(),
-        );
-      });
-  };
+        dispatch(contactDetailsActions.fetchContactDetailsFailure())
+      })
+  }
